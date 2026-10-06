@@ -40,6 +40,12 @@ create table if not exists answers (
   updated_at timestamptz not null default now(),
   primary key (respondent_id, question_id)
 );
+
+-- O app conecta como dono das tabelas e não é afetado. Sem políticas, o RLS fecha o acesso
+-- pela API REST automática do Supabase.
+alter table projects enable row level security;
+alter table respondents enable row level security;
+alter table answers enable row level security;
 `;
 
 async function createDriver(): Promise<Driver> {
@@ -74,7 +80,9 @@ const globalForDb = globalThis as unknown as { __quartDb?: Promise<Driver> };
 function getDriver(): Promise<Driver> {
   globalForDb.__quartDb ??= createDriver()
     .then(async (driver) => {
-      await driver.exec(SCHEMA);
+      // Um comando por vez: o pooler do Supabase (modo transação) não garante vários comandos numa chamada
+      const statements = SCHEMA.replace(/--.*$/gm, "").split(";").map((s) => s.trim()).filter(Boolean);
+      for (const statement of statements) await driver.exec(statement);
       return driver;
     })
     .catch((error) => {

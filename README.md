@@ -38,10 +38,10 @@ Cuidado ao renomear o `id` de uma pergunta que já tem respostas: as respostas a
 ## Publicar (Vercel)
 
 1. Suba esta pasta para um repositório no GitHub e importe na [Vercel](https://vercel.com/new).
-2. No projeto da Vercel, em **Storage**:
-   - conecte um **Postgres** (Neon). Isso cria a variável `DATABASE_URL`.
-   - crie um **Blob Store**. Isso cria a variável `BLOB_READ_WRITE_TOKEN` (é onde ficam os arquivos que os clientes enviam).
-3. Em **Settings → Environment Variables**, adicione `ADMIN_PASSWORD` (a senha do painel) e `ADMIN_SECRET` (um texto longo e aleatório).
-4. Faça o deploy. As tabelas do banco são criadas sozinhas no primeiro acesso.
+2. Banco de dados: use o **Supabase**. No projeto do Supabase, clique em **Connect** → **Transaction pooler** e copie a URI (porta `6543`). Troque `[YOUR-PASSWORD]` pela senha do banco e acrescente `?sslmode=require` no final. Essa é a `DATABASE_URL`.
+   (Qualquer Postgres serve: também dá para usar o Neon pelo **Storage** da Vercel.)
+3. Arquivos: no projeto da Vercel, em **Storage**, crie um **Blob Store**. Isso cria a variável `BLOB_READ_WRITE_TOKEN` (é onde ficam os arquivos que os clientes enviam).
+4. Em **Settings → Environment Variables**, adicione `DATABASE_URL`, `ADMIN_PASSWORD` (a senha do painel) e `ADMIN_SECRET` (um texto longo e aleatório).
+5. Faça o deploy. As tabelas do banco são criadas sozinhas no primeiro acesso.
 
 Para usar um domínio próprio depois, é só adicionar em **Settings → Domains**.
