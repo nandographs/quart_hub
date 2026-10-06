@@ -35,13 +35,10 @@ Todo o roteiro está em [`src/content/prework.ts`](src/content/prework.ts). Dá 
 
 Cuidado ao renomear o `id` de uma pergunta que já tem respostas: as respostas antigas ficam guardadas com o id anterior.
 
-## Publicar (Vercel)
+## Publicar (Vercel + Supabase)
 
-1. Suba esta pasta para um repositório no GitHub e importe na [Vercel](https://vercel.com/new).
-2. Banco de dados: use o **Supabase**. No projeto do Supabase, clique em **Connect** → **Transaction pooler** e copie a URI (porta `6543`). Troque `[YOUR-PASSWORD]` pela senha do banco e acrescente `?sslmode=require` no final. Essa é a `DATABASE_URL`.
-   (Qualquer Postgres serve: também dá para usar o Neon pelo **Storage** da Vercel.)
-3. Arquivos: no projeto da Vercel, em **Storage**, crie um **Blob Store**. Isso cria a variável `BLOB_READ_WRITE_TOKEN` (é onde ficam os arquivos que os clientes enviam).
-4. Em **Settings → Environment Variables**, adicione `DATABASE_URL`, `ADMIN_PASSWORD` (a senha do painel) e `ADMIN_SECRET` (um texto longo e aleatório).
-5. Faça o deploy. As tabelas do banco são criadas sozinhas no primeiro acesso.
-
-Para usar um domínio próprio depois, é só adicionar em **Settings → Domains**.
+1. Importe o repositório na Vercel.
+2. Em **Settings → Environment Variables**, crie `ADMIN_PASSWORD` (a senha do painel).
+3. Em **Integrations**, adicione a integração **Supabase** e conecte o projeto do Supabase. Ela cria a conexão do banco sozinha.
+4. Em **Storage**, crie um **Blob Store** (arquivos enviados pelos clientes).
+5. Faça o redeploy. As tabelas são criadas sozinhas no primeiro acesso.

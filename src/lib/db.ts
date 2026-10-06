@@ -49,10 +49,15 @@ alter table answers enable row level security;
 `;
 
 async function createDriver(): Promise<Driver> {
-  const url = process.env.DATABASE_URL;
+  // POSTGRES_URL é a variável que a integração Supabase ↔ Vercel cria sozinha
+  const url = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
   if (url) {
     const { default: postgres } = await import("postgres");
-    const sql = postgres(url, { prepare: false, max: 5 });
+    // Descarta parâmetros extras da URL (ex.: supa=base-pooler.x), que o driver mandaria ao servidor
+    const clean = new URL(url);
+    const local = ["localhost", "127.0.0.1"].includes(clean.hostname);
+    clean.search = "";
+    const sql = postgres(clean.toString(), { prepare: false, max: 5, ssl: local ? false : "require" });
     return {
       query: async (text, params = []) =>
         (await sql.unsafe(text, params as never[])) as unknown as Row[],

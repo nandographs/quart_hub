@@ -7,8 +7,9 @@ const COOKIE = "quart_admin";
 const MAX_AGE = 60 * 60 * 24 * 30;
 
 function secret() {
-  const s = process.env.ADMIN_SECRET;
-  if (!s) throw new Error("ADMIN_SECRET não configurado");
+  // ADMIN_SECRET é opcional: sem ele, a própria senha do painel assina o cookie
+  const s = process.env.ADMIN_SECRET || process.env.ADMIN_PASSWORD;
+  if (!s) throw new Error("ADMIN_PASSWORD não configurado");
   return s;
 }
 
