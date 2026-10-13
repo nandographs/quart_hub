@@ -8,7 +8,7 @@ import { createProject, deleteProject, deleteRespondent } from "@/lib/repo";
 export type FormState = { error?: string };
 
 export async function login(_prev: FormState, form: FormData): Promise<FormState> {
-  if (!checkPassword(String(form.get("password") ?? ""))) return { error: "Senha incorreta." };
+  if (!checkPassword(String(form.get("password") ?? "").trim())) return { error: "Senha incorreta." };
   await startAdminSession();
   redirect("/admin");
 }

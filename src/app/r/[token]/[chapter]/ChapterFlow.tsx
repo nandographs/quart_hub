@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AnswerValue, Chapter } from "@/content/types";
 import { QuestionInput, type StorageMode } from "@/components/form/QuestionInput";
@@ -9,6 +10,14 @@ type SaveStatus = "idle" | "saving" | "saved" | "error";
 type NextChapter = { id: string; number: string; title: string } | null;
 
 const SAVE_DELAY = 700;
+const DONE = "fim";
+
+/** Passo atual a partir de ?q=: 0 = abertura, 1..total = perguntas, total + 1 = capítulo concluído. */
+function stepFromQuery(q: string | null, total: number) {
+  if (q === DONE) return total + 1;
+  const n = Number.parseInt(q ?? "", 10);
+  return Number.isNaN(n) ? 0 : Math.min(Math.max(n, 1), total);
+}
 
 function useAutosave(token: string) {
   const pending = useRef<Record<string, AnswerValue>>({});
@@ -72,20 +81,20 @@ export function ChapterFlow({
   token,
   chapter,
   initialAnswers,
-  initialStep,
   nextChapter,
   storageMode,
 }: {
   token: string;
   chapter: Chapter;
   initialAnswers: Record<string, AnswerValue>;
-  initialStep: number;
   nextChapter: NextChapter;
   storageMode: StorageMode;
 }) {
   const total = chapter.questions.length;
   const doneStep = total + 1;
-  const [step, setStep] = useState(initialStep);
+  // O passo vive na URL: cada pergunta é uma entrada do histórico, então o "voltar" do navegador
+  // volta uma pergunta, e avançar/recarregar mostra a pergunta certa
+  const step = stepFromQuery(useSearchParams().get("q"), total);
   const [values, setValues] = useState(initialAnswers);
   const [finishing, setFinishing] = useState(false);
   const { status, queue, flush } = useAutosave(token);
@@ -95,11 +104,11 @@ export function ChapterFlow({
   const go = useCallback(
     (to: number) => {
       void flush();
-      setStep(to);
       const url = new URL(window.location.href);
       if (to >= 1 && to <= total) url.searchParams.set("q", String(to));
+      else if (to > total) url.searchParams.set("q", DONE);
       else url.searchParams.delete("q");
-      window.history.replaceState(null, "", url);
+      window.history.pushState(null, "", url);
       window.scrollTo({ top: 0 });
     },
     [flush, total],
