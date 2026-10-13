@@ -138,9 +138,10 @@ export async function markSubmitted(respondentId: string) {
 export async function saveAnswer(respondentId: string, questionId: string, value: AnswerValue) {
   await query(
     `insert into answers (respondent_id, question_id, value, updated_at)
-     values ($1, $2, $3::jsonb, now())
+     values ($1, $2, $3::text::jsonb, now())
      on conflict (respondent_id, question_id)
      do update set value = excluded.value, updated_at = now()`,
+    // Vai como texto e o banco converte: com "$3::jsonb" o driver codificaria o JSON uma segunda vez
     [respondentId, questionId, JSON.stringify(value)],
   );
   await query("update respondents set updated_at = now() where id = $1", [respondentId]);
